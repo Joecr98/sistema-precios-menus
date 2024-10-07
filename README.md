@@ -1,1 +1,1 @@
-prueba.
+Rama Master incluirá los cambios hasta haber finalizado el proyecto.
