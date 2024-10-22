@@ -7,5 +7,6 @@ export const routes = {
     facturacion: '/facturacion',
     menus: '/menus',
     productos: '/productos',
+    crud: '/crud',
   };
   
