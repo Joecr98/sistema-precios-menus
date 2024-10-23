@@ -94,11 +94,12 @@ export default function Clientes() {
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <main className="flex min-h-screen flex-col p-6">
       <h1 className="text-2xl font-bold mb-4 text-center">Gestión de Clientes</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow-lg">
+        {/* Formulario para añadir o editar cliente */}
+        <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50 px-6 py-10">
           <h2 className="text-xl font-semibold mb-4">Añadir / Editar Cliente</h2>
 
           <input
@@ -127,7 +128,7 @@ export default function Clientes() {
 
           <button
             onClick={crearCliente}
-            className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300"
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
           >
             {editando ? 'Actualizar Cliente' : 'Crear Cliente'}
           </button>
@@ -135,7 +136,8 @@ export default function Clientes() {
           {mensaje && <p className="text-green-500 mt-2">{mensaje}</p>}
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-lg">
+        {/* Lista de clientes */}
+        <div className="flex flex-col justify-start rounded-lg bg-gray-50 p-6">
           <h2 className="text-xl font-semibold mb-4">Lista de Clientes</h2>
           <ul className="space-y-2">
             {clientes.map((cliente) => (
@@ -148,13 +150,13 @@ export default function Clientes() {
                 </span>
                 <div>
                   <button
-                    className="p-2 bg-yellow-500 text-white rounded mr-2 hover:bg-yellow-600 transition duration-300"
+                    className="bg-yellow-500 text-white px-2 py-1 rounded mr-2 hover:bg-yellow-600 transition duration-300"
                     onClick={() => setEditando(cliente)}
                   >
                     Editar
                   </button>
                   <button
-                    className="p-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300"
+                    className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition duration-300"
                     onClick={() => eliminarCliente(cliente.id)}
                   >
                     Eliminar
@@ -165,6 +167,6 @@ export default function Clientes() {
           </ul>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
