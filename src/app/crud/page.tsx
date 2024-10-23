@@ -95,56 +95,76 @@ export default function Clientes() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Gestión de Clientes</h1>
+      <h1 className="text-2xl font-bold mb-4 text-center">Gestión de Clientes</h1>
 
-      <input
-        type="text"
-        placeholder="Nombre"
-        value={nuevoCliente.nombre}
-        onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombre: e.target.value })}
-        className="form-control mb-3"
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h2 className="text-xl font-semibold mb-4">Añadir / Editar Cliente</h2>
 
-      <input
-        type="text"
-        placeholder="Dirección"
-        value={nuevoCliente.direccion}
-        onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })}
-        className="form-control mb-3"
-      />
+          <input
+            type="text"
+            placeholder="Nombre"
+            value={nuevoCliente.nombre}
+            onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombre: e.target.value })}
+            className="w-full p-2 mb-3 border border-gray-300 rounded"
+          />
 
-      <input
-        type="text"
-        placeholder="Teléfono"
-        value={nuevoCliente.telefono}
-        onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
-        className="form-control mb-3"
-      />
+          <input
+            type="text"
+            placeholder="Dirección"
+            value={nuevoCliente.direccion}
+            onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })}
+            className="w-full p-2 mb-3 border border-gray-300 rounded"
+          />
 
-      <button onClick={crearCliente} className="btn btn-primary mb-3">
-        {editando ? 'Actualizar Cliente' : 'Crear Cliente'}
-      </button>
+          <input
+            type="text"
+            placeholder="Teléfono"
+            value={nuevoCliente.telefono}
+            onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
+            className="w-full p-2 mb-3 border border-gray-300 rounded"
+          />
 
-      {mensaje && <p className="text-success">{mensaje}</p>}
+          <button
+            onClick={crearCliente}
+            className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300"
+          >
+            {editando ? 'Actualizar Cliente' : 'Crear Cliente'}
+          </button>
 
-      <h2 className="text-xl font-semibold">Lista de Clientes</h2>
-      <ul className="list-group">
-        {clientes.map((cliente) => (
-          <li key={cliente.id} className="list-group-item d-flex justify-content-between">
-            <span>
-              {cliente.nombre} - {cliente.direccion} - {cliente.telefono}
-            </span>
-            <div>
-              <button className="btn btn-warning mr-2" onClick={() => setEditando(cliente)}>
-                Editar
-              </button>
-              <button className="btn btn-danger" onClick={() => eliminarCliente(cliente.id)}>
-                Eliminar
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+          {mensaje && <p className="text-green-500 mt-2">{mensaje}</p>}
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h2 className="text-xl font-semibold mb-4">Lista de Clientes</h2>
+          <ul className="space-y-2">
+            {clientes.map((cliente) => (
+              <li
+                key={cliente.id}
+                className="p-3 bg-gray-100 rounded-lg flex justify-between items-center"
+              >
+                <span>
+                  {cliente.nombre} - {cliente.direccion} - {cliente.telefono}
+                </span>
+                <div>
+                  <button
+                    className="p-2 bg-yellow-500 text-white rounded mr-2 hover:bg-yellow-600 transition duration-300"
+                    onClick={() => setEditando(cliente)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="p-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300"
+                    onClick={() => eliminarCliente(cliente.id)}
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }
