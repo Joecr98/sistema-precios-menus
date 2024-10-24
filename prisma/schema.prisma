@@ -12,3 +12,158 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model RolesFinal {
+  id_rol        Int       @id @default(autoincrement())
+  nombre_rol    String    @unique @db.VarChar(50)
+  usuarios      Usuario[]
+
+  @@map("roles_final")
+}
+
+model AreasFinal {
+  id_area     Int       @id @default(autoincrement())
+  nombrearea  String    @unique @db.VarChar(50)
+  usuarios    Usuario[]
+
+  @@map("areas_final")
+}
+
+model Usuario {
+  id_usuario     Int        @id @default(autoincrement())
+  nombre_usuario String     @db.VarChar(100)
+  correo         String     @unique @db.VarChar(100)
+  password       String     @db.VarChar(255) @map("contraseña")
+  id_rol         Int
+  id_area        Int
+  rol            RolesFinal @relation(fields: [id_rol], references: [id_rol])
+  area           AreasFinal @relation(fields: [id_area], references: [id_area])
+  precios        Precio[]   // Agregamos la relación inversa aquí
+
+  @@map("usuarios")
+}
+
+model Presentacion {
+  id        Int         @id @default(autoincrement())
+  nombre    String      @db.VarChar(50)
+  productos Producto[]
+
+  @@map("Presentaciones")
+}
+
+model Categoria {
+  id            Int           @id @default(autoincrement())
+  nombre        String        @db.VarChar(50)
+  subcategorias Subcategoria[]
+  productos     Producto[]
+
+  @@map("Categorias")
+}
+
+model Subcategoria {
+  id            Int       @id @default(autoincrement())
+  nombre        String    @db.VarChar(50)
+  categoria_id  Int
+  categoria     Categoria @relation(fields: [categoria_id], references: [id])
+  productos     Producto[]
+
+  @@map("Subcategorias")
+}
+
+model Producto {
+  id              Int           @id @default(autoincrement())
+  descripcion     String        @db.VarChar(255)
+  presentacion_id Int
+  categoria_id    Int
+  subcategoria_id Int
+  presentacion    Presentacion  @relation(fields: [presentacion_id], references: [id])
+  categoria       Categoria     @relation(fields: [categoria_id], references: [id])
+  subcategoria    Subcategoria  @relation(fields: [subcategoria_id], references: [id])
+  precios         Precio[]
+  detallesMenu    DetalleMenu[]
+  detallesFactura DetalleFactura[]
+
+  @@map("Productos")
+}
+
+model Precio {
+  id                 Int      @id @default(autoincrement())
+  producto_id        Int
+  precio_costo       Decimal  @db.Decimal(10, 2)
+  precio_unidad      Decimal  @db.Decimal(10, 2)
+  fecha_actualizacion DateTime @default(now())
+  id_usuario         Int
+  producto           Producto @relation(fields: [producto_id], references: [id])
+  usuario            Usuario  @relation(fields: [id_usuario], references: [id_usuario])
+
+  @@map("Precios")
+}
+
+model Menu {
+  id              Int       @id @default(autoincrement())
+  nombre          String    @db.VarChar(100)
+  fecha_creacion  DateTime  @default(now())
+  detallesMenu    DetalleMenu[]
+  configuraciones ConfiguracionMenuCliente[]
+
+  @@map("Menus")
+}
+
+model DetalleMenu {
+  id          Int      @id @default(autoincrement())
+  menu_id     Int
+  producto_id Int
+  cantidad    Decimal  @db.Decimal(10, 2)
+  es_extra    Boolean  @default(false)
+  menu        Menu     @relation(fields: [menu_id], references: [id])
+  producto    Producto @relation(fields: [producto_id], references: [id])
+
+  @@map("DetallesMenu")
+}
+
+model Cliente {
+  id              Int       @id @default(autoincrement())
+  nombre          String    @db.VarChar(100)
+  direccion       String?   @db.Text
+  telefono        String?   @db.VarChar(20)
+  configuraciones ConfiguracionMenuCliente[]
+  facturas        Factura[]
+
+  @@map("Clientes")
+}
+
+model ConfiguracionMenuCliente {
+  id          Int      @id @default(autoincrement())
+  cliente_id  Int
+  menu_id     Int
+  dia_semana  String   @db.VarChar(20)
+  cliente     Cliente  @relation(fields: [cliente_id], references: [id])
+  menu        Menu     @relation(fields: [menu_id], references: [id])
+
+  @@map("ConfiguracionMenuCliente")
+}
+
+model Factura {
+  id           Int              @id @default(autoincrement())
+  cliente_id   Int
+  fecha_inicio DateTime         @db.Date
+  fecha_fin    DateTime         @db.Date
+  total        Decimal          @db.Decimal(10, 2)
+  cliente      Cliente          @relation(fields: [cliente_id], references: [id])
+  detalles     DetalleFactura[]
+
+  @@map("Facturas")
+}
+
+model DetalleFactura {
+  id              Int      @id @default(autoincrement())
+  factura_id      Int
+  producto_id     Int
+  cantidad        Decimal  @db.Decimal(10, 2)
+  precio_unitario Decimal  @db.Decimal(10, 2)
+  subtotal        Decimal  @db.Decimal(10, 2)
+  factura         Factura  @relation(fields: [factura_id], references: [id])
+  producto        Producto @relation(fields: [producto_id], references: [id])
+
+  @@map("DetallesFactura")
+}
