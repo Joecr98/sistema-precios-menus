@@ -21,7 +21,8 @@
     "react": "^18",
     "react-dom": "^18",
     "sistema-precios-menus": "file:",
-    "tailwind-merge": "^2.5.4"
+    "tailwind-merge": "^2.5.4",
+    "sweetalert2": "^11.14.4"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.7",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Swal from 'sweetalert2'; // Importar SweetAlert2 (si no lo tiene lo instalan--> npm install sweetalert2)
 
 // Definir el tipo Cliente
 type Cliente = {
@@ -12,7 +13,7 @@ type Cliente = {
 
 export default function Clientes() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [nuevoCliente, setNuevoCliente] = useState({ nombre: '', direccion: '', telefono: '' });
+  const [nuevoCliente, setNuevoCliente] = useState({ id: 0, nombre: '', direccion: '', telefono: '' });
   const [mensaje, setMensaje] = useState('');
   const [editando, setEditando] = useState<Cliente | null>(null);
 
@@ -42,7 +43,7 @@ export default function Clientes() {
 
       if (res.ok) {
         setMensaje('Cliente creado exitosamente');
-        setNuevoCliente({ nombre: '', direccion: '', telefono: '' });
+        setNuevoCliente({ id: 0, nombre: '', direccion: '', telefono: '' });
         obtenerClientes();
       } else {
         setMensaje('Error al crear el cliente');
@@ -75,21 +76,46 @@ export default function Clientes() {
     }
   };
 
-  // Eliminar cliente
-  const eliminarCliente = async (id: number) => {
-    try {
-      const res = await fetch(`/api/clientes?id=${id}`, {
-        method: 'DELETE',
-      });
+  // Manejar el envío del formulario
+  const manejarEnvio = () => {
+    if (editando) {
+      actualizarCliente();
+    } else {
+      crearCliente();
+    }
+  };
 
-      if (res.ok) {
-        setMensaje('Cliente eliminado exitosamente');
-        obtenerClientes();
-      } else {
-        setMensaje('Error al eliminar el cliente');
+  // Eliminar cliente con confirmación
+  const eliminarCliente = async (id: number) => {
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: "No podrás revertir esta acción!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar!',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const res = await fetch(`/api/clientes?id=${id}`, {
+          method: 'DELETE',
+        });
+
+        if (res.ok) {
+          setMensaje('Cliente eliminado exitosamente');
+          obtenerClientes();
+          Swal.fire('Eliminado!', 'El cliente ha sido eliminado.', 'success');
+        } else {
+          setMensaje('Error al eliminar el cliente');
+          Swal.fire('Error!', 'No se pudo eliminar el cliente.', 'error');
+        }
+      } catch (error) {
+        console.error('Error al eliminar el cliente:', error);
+        Swal.fire('Error!', 'No se pudo eliminar el cliente.', 'error');
       }
-    } catch (error) {
-      console.error('Error al eliminar el cliente:', error);
     }
   };
 
@@ -105,29 +131,35 @@ export default function Clientes() {
           <input
             type="text"
             placeholder="Nombre"
-            value={nuevoCliente.nombre}
-            onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombre: e.target.value })}
+            value={editando ? editando.nombre : nuevoCliente.nombre}
+            onChange={(e) => editando 
+              ? setEditando({ ...editando, nombre: e.target.value }) 
+              : setNuevoCliente({ ...nuevoCliente, nombre: e.target.value })}
             className="w-full p-2 mb-3 border border-gray-300 rounded"
           />
 
           <input
             type="text"
             placeholder="Dirección"
-            value={nuevoCliente.direccion}
-            onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })}
+            value={editando ? editando.direccion : nuevoCliente.direccion}
+            onChange={(e) => editando 
+              ? setEditando({ ...editando, direccion: e.target.value }) 
+              : setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })}
             className="w-full p-2 mb-3 border border-gray-300 rounded"
           />
 
           <input
             type="text"
             placeholder="Teléfono"
-            value={nuevoCliente.telefono}
-            onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
+            value={editando ? editando.telefono : nuevoCliente.telefono}
+            onChange={(e) => editando 
+              ? setEditando({ ...editando, telefono: e.target.value }) 
+              : setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
             className="w-full p-2 mb-3 border border-gray-300 rounded"
           />
 
           <button
-            onClick={crearCliente}
+            onClick={manejarEnvio}
             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
           >
             {editando ? 'Actualizar Cliente' : 'Crear Cliente'}
@@ -157,7 +189,7 @@ export default function Clientes() {
                   </button>
                   <button
                     className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition duration-300"
-                    onClick={() => eliminarCliente(cliente.id)}
+                    onClick={() => eliminarCliente(cliente.id)} // Llamada a eliminar con confirmación
                   >
                     Eliminar
                   </button>

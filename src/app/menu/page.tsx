@@ -54,6 +54,9 @@ export default function Menu() {
         <li className="list-group-item" onClick={() => handleNavigation('/productos')}>
           Productos
         </li>
+        <li className="list-group-item" onClick={() => handleNavigation('/crud')}>
+          Clientes
+        </li>
       </ul>
 
       <button className="btn btn-logout mt-4" onClick={handleLogout}>
