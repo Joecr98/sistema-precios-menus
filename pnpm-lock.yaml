@@ -1743,7 +1743,11 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
+<<<<<<< HEAD
   '@babel/runtime@7.25.9':
+=======
+  '@babel/runtime@7.25.7':
+>>>>>>> origin/efarfanr_dev
     dependencies:
       regenerator-runtime: 0.14.1
 
@@ -2162,7 +2166,11 @@ snapshots:
 
   canvg@3.0.10:
     dependencies:
+<<<<<<< HEAD
       '@babel/runtime': 7.25.9
+=======
+      '@babel/runtime': 7.25.7
+>>>>>>> origin/efarfanr_dev
       '@types/raf': 3.4.3
       core-js: 3.38.1
       raf: 3.4.1
@@ -2940,7 +2948,11 @@ snapshots:
 
   jspdf@2.5.2:
     dependencies:
+<<<<<<< HEAD
       '@babel/runtime': 7.25.9
+=======
+      '@babel/runtime': 7.25.7
+>>>>>>> origin/efarfanr_dev
       atob: 2.1.2
       btoa: 1.2.1
       fflate: 0.8.2
