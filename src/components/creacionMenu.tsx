@@ -84,6 +84,11 @@ const CreacionMenu = () => {
   };
 
   const actualizarDetalle = (index: number, campo: keyof DetalleMenu, valor: any) => {
+    if (campo === 'cantidad') {
+      // Convertir a entero y asegurarse de que no sea negativo
+      valor = Math.max(1, parseInt(valor) || 1);
+    }
+    
     setMenu(prev => {
       const nuevosDetalles = [...prev.detalles];
       nuevosDetalles[index] = {
@@ -122,8 +127,8 @@ const CreacionMenu = () => {
         setError('Todos los productos deben ser seleccionados');
         return false;
       }
-      if (detalle.cantidad <= 0) {
-        setError('La cantidad debe ser mayor a 0');
+      if (detalle.cantidad < 1 || !Number.isInteger(detalle.cantidad)) {
+        setError('La cantidad debe ser un número entero mayor a 0');
         return false;
       }
     }
@@ -157,7 +162,6 @@ const CreacionMenu = () => {
       setSuccess('Menú creado exitosamente');
       limpiarFormulario();
       
-      // Limpiar mensaje de éxito después de 3 segundos
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar el menú');
@@ -239,10 +243,10 @@ const CreacionMenu = () => {
                   <input
                     type="number"
                     value={detalle.cantidad}
-                    onChange={(e) => actualizarDetalle(index, 'cantidad', parseFloat(e.target.value))}
+                    onChange={(e) => actualizarDetalle(index, 'cantidad', e.target.value)}
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    min="0"
-                    step="0.01"
+                    min="1"
+                    step="1" // Asegura que solo se puedan ingresar números enteros
                   />
                 </div>
 
