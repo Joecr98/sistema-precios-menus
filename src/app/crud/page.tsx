@@ -12,7 +12,7 @@ type Cliente = {
 
 export default function Clientes() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [nuevoCliente, setNuevoCliente] = useState({ nombre: '', direccion: '', telefono: '' });
+  const [nuevoCliente, setNuevoCliente] = useState({ id: 0, nombre: '', direccion: '', telefono: '' });
   const [mensaje, setMensaje] = useState('');
   const [editando, setEditando] = useState<Cliente | null>(null);
 
@@ -42,7 +42,7 @@ export default function Clientes() {
 
       if (res.ok) {
         setMensaje('Cliente creado exitosamente');
-        setNuevoCliente({ nombre: '', direccion: '', telefono: '' });
+        setNuevoCliente({ id: 0, nombre: '', direccion: '', telefono: '' });
         obtenerClientes();
       } else {
         setMensaje('Error al crear el cliente');
@@ -72,6 +72,15 @@ export default function Clientes() {
       }
     } catch (error) {
       console.error('Error al actualizar el cliente:', error);
+    }
+  };
+
+  // Manejar el envío del formulario
+  const manejarEnvio = () => {
+    if (editando) {
+      actualizarCliente();
+    } else {
+      crearCliente();
     }
   };
 
@@ -105,29 +114,35 @@ export default function Clientes() {
           <input
             type="text"
             placeholder="Nombre"
-            value={nuevoCliente.nombre}
-            onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombre: e.target.value })}
+            value={editando ? editando.nombre : nuevoCliente.nombre}
+            onChange={(e) => editando 
+              ? setEditando({ ...editando, nombre: e.target.value }) 
+              : setNuevoCliente({ ...nuevoCliente, nombre: e.target.value })}
             className="w-full p-2 mb-3 border border-gray-300 rounded"
           />
 
           <input
             type="text"
             placeholder="Dirección"
-            value={nuevoCliente.direccion}
-            onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })}
+            value={editando ? editando.direccion : nuevoCliente.direccion}
+            onChange={(e) => editando 
+              ? setEditando({ ...editando, direccion: e.target.value }) 
+              : setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })}
             className="w-full p-2 mb-3 border border-gray-300 rounded"
           />
 
           <input
             type="text"
             placeholder="Teléfono"
-            value={nuevoCliente.telefono}
-            onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
+            value={editando ? editando.telefono : nuevoCliente.telefono}
+            onChange={(e) => editando 
+              ? setEditando({ ...editando, telefono: e.target.value }) 
+              : setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
             className="w-full p-2 mb-3 border border-gray-300 rounded"
           />
 
           <button
-            onClick={crearCliente}
+            onClick={manejarEnvio}
             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
           >
             {editando ? 'Actualizar Cliente' : 'Crear Cliente'}
