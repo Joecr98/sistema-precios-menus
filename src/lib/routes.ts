@@ -8,4 +8,3 @@ export const routes = {
     menus: '/menus',
     productos: '/productos',
   };
-  
