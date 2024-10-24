@@ -17,7 +17,8 @@
     "next": "14.2.14",
     "react": "^18",
     "react-dom": "^18",
-    "sistema-precios-menus": "file:"
+    "sistema-precios-menus": "file:",
+    "sweetalert2": "^11.14.4"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.7",
