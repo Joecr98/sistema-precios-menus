@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Plus, Trash2, Save } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Plus, Trash2, Save } from "lucide-react";
 
 interface Producto {
   id: number;
@@ -26,14 +26,14 @@ interface Menu {
 
 const CreacionMenu = () => {
   const [menu, setMenu] = useState<Menu>({
-    nombre: '',
-    detalles: []
+    nombre: "",
+    detalles: [],
   });
-  
+
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [costoTotal, setCostoTotal] = useState(0);
 
   useEffect(() => {
@@ -47,36 +47,37 @@ const CreacionMenu = () => {
   const fetchProductos = async () => {
     try {
       setLoading(true);
-      setError('');
-      const response = await fetch('/api/products');
-      
+      setError("");
+      const response = await fetch("/api/products");
+
       if (!response.ok) {
         throw new Error(`Error al obtener productos: ${response.statusText}`);
       }
-      
+
       const data = await response.json();
-      console.log('Productos recibidos:', data); // Para debugging
+      console.log("Productos recibidos:", data); // Para debugging
 
       if (!Array.isArray(data)) {
-        throw new Error('Los datos recibidos no tienen el formato esperado');
+        throw new Error("Los datos recibidos no tienen el formato esperado");
       }
 
       // Transformar y validar los datos recibidos
-      const productosValidados = data.map(item => ({
+      const productosValidados = data.map((item) => ({
         id: item.id,
-        descripcion: item.descripcion || 'Sin descripción',
-        presentacion: item.presentacion || 'Sin presentación',
-        categoria: item.categoria || 'Sin categoría',
-        subcategoria: item.subcategoria || 'Sin subcategoría',
+        descripcion: item.descripcion || "Sin descripción",
+        presentacion: item.presentacion || "Sin presentación",
+        categoria: item.categoria || "Sin categoría",
+        subcategoria: item.subcategoria || "Sin subcategoría",
         precio_unidad: Number(item.precio_unidad) || 0,
-        precio_costo: Number(item.precio_costo) || 0
+        precio_costo: Number(item.precio_costo) || 0,
       }));
 
       setProductos(productosValidados);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar los productos';
+      const errorMessage =
+        err instanceof Error ? err.message : "Error al cargar los productos";
       setError(errorMessage);
-      console.error('Error en fetchProductos:', err);
+      console.error("Error en fetchProductos:", err);
     } finally {
       setLoading(false);
     }
@@ -84,94 +85,109 @@ const CreacionMenu = () => {
 
   const calcularCostoTotal = () => {
     const total = menu.detalles.reduce((sum, detalle) => {
-      const producto = productos.find(p => p.id === Number(detalle.producto_id));
+      const producto = productos.find(
+        (p) => p.id === Number(detalle.producto_id)
+      );
       return sum + (producto?.precio_unidad || 0) * detalle.cantidad;
     }, 0);
     setCostoTotal(total);
   };
 
   const agregarProducto = () => {
-    setMenu(prev => ({
+    setMenu((prev) => ({
       ...prev,
-      detalles: [...prev.detalles, {
-        producto_id: '',
-        cantidad: 1,
-        es_extra: false
-      }]
+      detalles: [
+        ...prev.detalles,
+        {
+          producto_id: "",
+          cantidad: 1,
+          es_extra: false,
+        },
+      ],
     }));
   };
 
   const eliminarProducto = (index: number) => {
-    setMenu(prev => ({
+    setMenu((prev) => ({
       ...prev,
-      detalles: prev.detalles.filter((_, i) => i !== index)
+      detalles: prev.detalles.filter((_, i) => i !== index),
     }));
   };
 
-  const actualizarDetalle = (index: number, campo: keyof DetalleMenu, valor: any) => {
-    setMenu(prev => {
+  const actualizarDetalle = (
+    index: number,
+    campo: keyof DetalleMenu,
+    valor: any
+  ) => {
+    setMenu((prev) => {
       const nuevosDetalles = [...prev.detalles];
       nuevosDetalles[index] = {
         ...nuevosDetalles[index],
-        [campo]: campo === 'cantidad' ? Math.max(1, parseInt(valor) || 1) : valor
+        [campo]:
+          campo === "cantidad" ? Math.max(1, parseInt(valor) || 1) : valor,
       };
       return {
         ...prev,
-        detalles: nuevosDetalles
+        detalles: nuevosDetalles,
       };
     });
   };
 
   const limpiarFormulario = () => {
     setMenu({
-      nombre: '',
-      detalles: []
+      nombre: "",
+      detalles: [],
     });
     setCostoTotal(0);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
   };
 
   const guardarMenu = async () => {
     try {
       setLoading(true);
-      setError('');
-      setSuccess('');
+      setError("");
+      setSuccess("");
 
       if (!menu.nombre.trim()) {
-        throw new Error('El nombre del menú es requerido');
+        throw new Error("El nombre del menú es requerido");
       }
 
       if (menu.detalles.length === 0) {
-        throw new Error('Debe agregar al menos un producto al menú');
+        throw new Error("Debe agregar al menos un producto al menú");
       }
 
-      // Validar que todos los productos tengan valores válidos
       const detallesInvalidos = menu.detalles.some(
-        detalle => !detalle.producto_id || detalle.cantidad < 1
+        (detalle) => !detalle.producto_id || detalle.cantidad < 1
       );
 
       if (detallesInvalidos) {
-        throw new Error('Todos los productos deben tener una selección válida y cantidad mayor a 0');
+        throw new Error(
+          "Todos los productos deben tener una selección válida y cantidad mayor a 0"
+        );
       }
 
-      const response = await fetch('/api/menus', {
-        method: 'POST',
+      const response = await fetch("/api/menus", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(menu)
+        body: JSON.stringify(menu),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al guardar el menú');
+        throw new Error(errorData.error || "Error al guardar el menú");
       }
 
-      setSuccess('Menú guardado exitosamente');
+      setSuccess("Menú guardado exitosamente");
+      // Mostrar alerta
+      alert("¡Menú guardado exitosamente!");
+
       limpiarFormulario();
+
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al guardar el menú');
+      setError(err instanceof Error ? err.message : "Error al guardar el menú");
     } finally {
       setLoading(false);
     }
@@ -188,7 +204,7 @@ const CreacionMenu = () => {
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <h2 className="text-xl font-semibold mb-6">Crear Nuevo Menú</h2>
-      
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
@@ -200,7 +216,7 @@ const CreacionMenu = () => {
           {success}
         </div>
       )}
-      
+
       <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -209,7 +225,9 @@ const CreacionMenu = () => {
           <input
             type="text"
             value={menu.nombre}
-            onChange={(e) => setMenu(prev => ({ ...prev, nombre: e.target.value }))}
+            onChange={(e) =>
+              setMenu((prev) => ({ ...prev, nombre: e.target.value }))
+            }
             className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             placeholder="Ingrese el nombre del menú"
           />
@@ -229,17 +247,24 @@ const CreacionMenu = () => {
 
           <div className="space-y-4">
             {menu.detalles.map((detalle, index) => (
-              <div key={index} className="flex gap-4 items-start p-4 bg-gray-50 rounded-md">
+              <div
+                key={index}
+                className="flex gap-4 items-start p-4 bg-gray-50 rounded-md"
+              >
                 <div className="flex-1">
                   <select
                     value={detalle.producto_id}
-                    onChange={(e) => actualizarDetalle(index, 'producto_id', e.target.value)}
+                    onChange={(e) =>
+                      actualizarDetalle(index, "producto_id", e.target.value)
+                    }
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Seleccione un producto</option>
-                    {productos.map(producto => (
+                    {productos.map((producto) => (
                       <option key={producto.id} value={producto.id}>
-                        {`${producto.descripcion} - ${producto.presentacion} - $${producto.precio_unidad.toFixed(2)}`}
+                        {`${producto.descripcion} - ${
+                          producto.presentacion
+                        } - $${producto.precio_unidad.toFixed(2)}`}
                       </option>
                     ))}
                   </select>
@@ -249,7 +274,9 @@ const CreacionMenu = () => {
                   <input
                     type="number"
                     value={detalle.cantidad}
-                    onChange={(e) => actualizarDetalle(index, 'cantidad', e.target.value)}
+                    onChange={(e) =>
+                      actualizarDetalle(index, "cantidad", e.target.value)
+                    }
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     min="1"
                     step="1"
@@ -260,7 +287,9 @@ const CreacionMenu = () => {
                   <input
                     type="checkbox"
                     checked={detalle.es_extra}
-                    onChange={(e) => actualizarDetalle(index, 'es_extra', e.target.checked)}
+                    onChange={(e) =>
+                      actualizarDetalle(index, "es_extra", e.target.checked)
+                    }
                     className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <label className="text-sm text-gray-600">Extra</label>
@@ -280,9 +309,9 @@ const CreacionMenu = () => {
 
         <div className="flex justify-between items-center pt-4 border-t border-gray-200">
           <div className="text-lg font-semibold text-gray-700">
-            Costo Total: ${costoTotal.toFixed(2)}
+            Costo Total: Q{costoTotal.toFixed(2)}
           </div>
-          
+
           <div className="flex gap-4">
             <button
               onClick={limpiarFormulario}
@@ -296,7 +325,7 @@ const CreacionMenu = () => {
               className="flex items-center gap-2 px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              {loading ? 'Guardando...' : 'Guardar Menú'}
+              {loading ? "Guardando..." : "Guardar Menú"}
             </button>
           </div>
         </div>

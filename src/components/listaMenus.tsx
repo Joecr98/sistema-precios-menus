@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Table } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { Table } from "lucide-react";
 
 interface DetalleMenu {
   id: number;
@@ -22,7 +22,7 @@ interface Menu {
 const ListaMenus = () => {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [menuSeleccionado, setMenuSeleccionado] = useState<Menu | null>(null);
 
   useEffect(() => {
@@ -32,14 +32,15 @@ const ListaMenus = () => {
   const cargarMenus = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/menus');
+      const response = await fetch("/api/menus");
       if (!response.ok) {
-        throw new Error('Error al cargar los menús');
+        throw new Error("Error al cargar los menús");
       }
       const data = await response.json();
+      console.log("Datos recibidos:", data); // Para debugging
       setMenus(data);
     } catch (err) {
-      setError('Error al cargar los menús');
+      setError("Error al cargar los menús");
       console.error(err);
     } finally {
       setLoading(false);
@@ -48,15 +49,18 @@ const ListaMenus = () => {
 
   const calcularCostoTotal = (detalles: DetalleMenu[]) => {
     return detalles.reduce((sum, detalle) => {
-      return sum + (detalle.producto.precio_unidad * detalle.cantidad);
+      // Asegurarse de que precio_unidad y cantidad sean números
+      const precioUnidad = Number(detalle.producto?.precio_unidad) || 0;
+      const cantidad = Number(detalle.cantidad) || 0;
+      return sum + precioUnidad * cantidad;
     }, 0);
   };
 
   const formatearFecha = (fecha: string) => {
-    return new Date(fecha).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(fecha).toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -85,13 +89,14 @@ const ListaMenus = () => {
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {menus.map((menu) => (
-            <div
-              key={menu.id}
-              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => setMenuSeleccionado(menu)}
-            >
-              <div className="p-6">
+          {menus.map((menu) => {
+            const costoTotal = calcularCostoTotal(menu.detallesMenu);
+            return (
+              <div
+                key={menu.id}
+                className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer p-6"
+                onClick={() => setMenuSeleccionado(menu)}
+              >
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   {menu.nombre}
                 </h3>
@@ -103,17 +108,18 @@ const ListaMenus = () => {
                     {menu.detallesMenu.length} productos
                   </p>
                   <p className="font-medium text-gray-800">
-                    Costo Total: ${calcularCostoTotal(menu.detallesMenu).toFixed(2)}
+                    Costo Total: ${costoTotal.toFixed(2)}
                   </p>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
+      {/* Modal para ver detalles del menú */}
       {menuSeleccionado && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-start mb-4">
@@ -130,14 +136,26 @@ const ListaMenus = () => {
                   className="text-gray-400 hover:text-gray-500"
                 >
                   <span className="sr-only">Cerrar</span>
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
 
               <div className="mt-6">
-                <h4 className="font-medium text-gray-700 mb-3">Productos del Menú</h4>
+                <h4 className="font-medium text-gray-700 mb-3">
+                  Productos del Menú
+                </h4>
                 <div className="space-y-3">
                   {menuSeleccionado.detallesMenu.map((detalle) => (
                     <div
@@ -158,7 +176,10 @@ const ListaMenus = () => {
                         </p>
                       </div>
                       <p className="font-medium text-gray-700">
-                        ${(detalle.producto.precio_unidad * detalle.cantidad).toFixed(2)}
+                        $
+                        {(
+                          detalle.producto.precio_unidad * detalle.cantidad
+                        ).toFixed(2)}
                       </p>
                     </div>
                   ))}
@@ -167,7 +188,10 @@ const ListaMenus = () => {
                   <div className="flex justify-between items-center">
                     <p className="font-semibold text-gray-800">Total</p>
                     <p className="font-semibold text-gray-800">
-                      ${calcularCostoTotal(menuSeleccionado.detallesMenu).toFixed(2)}
+                      $
+                      {calcularCostoTotal(
+                        menuSeleccionado.detallesMenu
+                      ).toFixed(2)}
                     </p>
                   </div>
                 </div>
