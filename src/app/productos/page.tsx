@@ -352,13 +352,13 @@ export default function ProductsPage() {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button
                     onClick={() => handleEdit(product)}
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
+                    className="text-white-600 bg-orange-500 hover:bg-orange-700 mr-4"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => handleDelete(product.id)}
-                    className="text-red-600 hover:text-red-900"
+                    className="text-white bg-red-500 hover:bg-red-700"
                   >
                     Borrar
                   </button>
@@ -392,7 +392,7 @@ export default function ProductsPage() {
             <button
               type="button"
               onClick={() => setShowNewPresentacion(!showNewPresentacion)}
-              className="text-indigo-600 hover:text-indigo-900"
+              className="text-white-600 hover:text-indigo-900"
             >
               {showNewPresentacion
                 ? "- Cancelar nueva presentación"
@@ -422,7 +422,7 @@ export default function ProductsPage() {
             <button
               type="button"
               onClick={() => setShowNewCategoria(!showNewCategoria)}
-              className="text-indigo-600 hover:text-indigo-900"
+              className="text-white-600 hover:text-indigo-900"
             >
               {showNewCategoria
                 ? "- Cancelar nueva categoría"
@@ -452,7 +452,7 @@ export default function ProductsPage() {
             <button
               type="button"
               onClick={() => setShowNewSubcategoria(!showNewSubcategoria)}
-              className="text-indigo-600 hover:text-indigo-900"
+              className="text-white-600 hover:text-indigo-900"
             >
               {showNewSubcategoria
                 ? "- Cancelar nueva subcategoría"

@@ -297,7 +297,7 @@ const CreacionMenu = () => {
 
                 <button
                   onClick={() => eliminarProducto(index)}
-                  className="p-2 text-red-500 hover:text-red-700 transition-colors"
+                  className="p-2 bg-white text-red-500 hover:text-red-700 rounded-full shadow-md hover:shadow-lg transition-all"
                   title="Eliminar producto"
                 >
                   <Trash2 className="w-4 h-4" />

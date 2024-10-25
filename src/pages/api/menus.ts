@@ -18,7 +18,7 @@ export default async function handler(
                     orderBy: {
                       fecha_actualizacion: 'desc'
                     },
-                    take: 1 // Tomar solo el precio más reciente
+                    take: 1
                   }
                 }
               }
@@ -30,7 +30,6 @@ export default async function handler(
         }
       });
 
-      // Transformar los datos para incluir el precio directamente en el producto
       const menusConPrecios = menus.map(menu => ({
         ...menu,
         detallesMenu: menu.detallesMenu.map(detalle => ({
@@ -92,7 +91,6 @@ export default async function handler(
         }
       });
 
-      // Transformar los datos de la misma manera que en el GET
       const menuConPrecios = {
         ...menu,
         detallesMenu: menu.detallesMenu.map(detalle => ({
@@ -112,7 +110,50 @@ export default async function handler(
     }
   }
 
+  // DELETE /api/menus - Eliminar un menú
+  if (req.method === 'DELETE') {
+    try {
+      const { id } = req.query;
+
+      if (!id) {
+        return res.status(400).json({ error: 'ID del menú es requerido' });
+      }
+
+      // Verificar si el menú está siendo usado en configuraciones de cliente
+      const configuracionesExistentes = await prisma.configuracionMenuCliente.findFirst({
+        where: {
+          menu_id: Number(id)
+        }
+      });
+
+      if (configuracionesExistentes) {
+        return res.status(400).json({ 
+          error: 'No se puede eliminar el menú porque está siendo usado en configuraciones de cliente' 
+        });
+      }
+
+      // Primero eliminamos los detalles del menú
+      await prisma.detalleMenu.deleteMany({
+        where: {
+          menu_id: Number(id)
+        }
+      });
+
+      // Luego eliminamos el menú
+      await prisma.menu.delete({
+        where: {
+          id: Number(id)
+        }
+      });
+
+      return res.status(200).json({ message: 'Menú eliminado correctamente' });
+    } catch (error) {
+      console.error('Error al eliminar menú:', error);
+      return res.status(500).json({ error: 'Error al eliminar el menú' });
+    }
+  }
+
   // Método no permitido
-  res.setHeader('Allow', ['GET', 'POST']);
+  res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
   return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
 }
