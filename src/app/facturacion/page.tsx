@@ -1,4 +1,4 @@
-import BillingComponent from '../../components/facturacion/FacturacionMenu';
+import BillingComponent from '../../components/facturacion/BillingComponent';
 
 export default function FacturacionPage() {
   return (

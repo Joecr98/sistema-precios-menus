@@ -271,4 +271,4 @@ const BillingComponent = () => {
   );
 };
 
-export default FacturacionMenu;
+export default BillingComponent;
