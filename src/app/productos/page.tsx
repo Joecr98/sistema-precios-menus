@@ -28,8 +28,8 @@ interface NewProduct {
 }
 
 const formatPrice = (price: number | string | null | undefined): string => {
-  if (!price) return 'No disponible';
-  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+  if (!price) return "No disponible";
+  const numPrice = typeof price === "string" ? parseFloat(price) : price;
   return `$${numPrice.toFixed(2)}`;
 };
 
@@ -40,17 +40,18 @@ export default function ProductsPage() {
     categorias: [],
     subcategorias: [],
   });
-  
-// Nuevo estado para elementos
-const [newPresentacion, setNewPresentacion] = useState("");
-const [newCategoria, setNewCategoria] = useState("");
-const [newSubcategoria, setNewSubcategoria] = useState("");
-const [selectedCategoriaForSub, setSelectedCategoriaForSub] = useState<number>(0);
 
-// Estado para mostrar/ocultar formularios
-const [showNewPresentacion, setShowNewPresentacion] = useState(false);
-const [showNewCategoria, setShowNewCategoria] = useState(false);
-const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
+  // Nuevo estado para elementos
+  const [newPresentacion, setNewPresentacion] = useState("");
+  const [newCategoria, setNewCategoria] = useState("");
+  const [newSubcategoria, setNewSubcategoria] = useState("");
+  const [selectedCategoriaForSub, setSelectedCategoriaForSub] =
+    useState<number>(0);
+
+  // Estado para mostrar/ocultar formularios
+  const [showNewPresentacion, setShowNewPresentacion] = useState(false);
+  const [showNewCategoria, setShowNewCategoria] = useState(false);
+  const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
 
   const [newProduct, setNewProduct] = useState<NewProduct>({
     descripcion: "",
@@ -58,13 +59,13 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
     categoria_id: 0,
     subcategoria_id: 0,
     precio_costo: "",
-    precio_unidad: ""
+    precio_unidad: "",
   });
-  
+
   const [editProduct, setEditProduct] = useState<Product | null>(null);
- // Estados para mensajes
- const [error, setError] = useState<string>("");
- const [success, setSuccess] = useState<string>("");
+  // Estados para mensajes
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
 
   useEffect(() => {
     fetchProducts();
@@ -83,7 +84,9 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
     setSelectOptions(data);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setNewProduct((prev) => ({
       ...prev,
@@ -96,14 +99,14 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
       setError("El nombre de la presentación no puede estar vacío");
       return;
     }
-    
+
     try {
       const response = await fetch("/api/presentaciones", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre: newPresentacion })
+        body: JSON.stringify({ nombre: newPresentacion }),
       });
-      
+
       if (response.ok) {
         setSuccess("Presentación agregada correctamente");
         setNewPresentacion("");
@@ -122,16 +125,16 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
       setError("El nombre de la categoría no puede estar vacío");
       return;
     }
-    
+
     try {
       const response = await fetch("/api/categorias", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre: newCategoria })
+        body: JSON.stringify({ nombre: newCategoria }),
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok) {
         setSuccess(data.message || "Categoría agregada correctamente");
         setNewCategoria("");
@@ -141,7 +144,7 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
         setError(data.message || "Error al agregar la categoría");
       }
     } catch (error) {
-      console.error('Error al agregar categoría:', error);
+      console.error("Error al agregar categoría:", error);
       setError("Error al agregar la categoría");
     }
   };
@@ -151,17 +154,17 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
       setError("Debe completar todos los campos de la subcategoría");
       return;
     }
-    
+
     try {
       const response = await fetch("/api/subcategorias", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombre: newSubcategoria,
-          categoria_id: selectedCategoriaForSub
-        })
+          categoria_id: selectedCategoriaForSub,
+        }),
       });
-      
+
       if (response.ok) {
         setSuccess("Subcategoría agregada correctamente");
         setNewSubcategoria("");
@@ -181,22 +184,50 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
     setError("");
     setSuccess("");
 
-    if (!newProduct.precio_costo || !newProduct.precio_unidad) {
-      setError("Los precios son obligatorios");
-      return;
+    // Si estamos editando, validamos los precios del producto editado
+    if (editProduct) {
+      if (!editProduct.precio_costo || !editProduct.precio_unidad) {
+        setError("Los precios son obligatorios");
+        return;
+      }
+    } else {
+      // Si estamos creando un nuevo producto, validamos los precios del nuevo producto
+      if (!newProduct.precio_costo || !newProduct.precio_unidad) {
+        setError("Los precios son obligatorios");
+        return;
+      }
     }
 
     try {
+      // Preparar los datos para enviar
+      const dataToSend = editProduct
+        ? {
+            ...editProduct,
+            precio_costo:
+              typeof editProduct.precio_costo === "string"
+                ? parseFloat(editProduct.precio_costo)
+                : editProduct.precio_costo,
+            precio_unidad:
+              typeof editProduct.precio_unidad === "string"
+                ? parseFloat(editProduct.precio_unidad)
+                : editProduct.precio_unidad,
+          }
+        : newProduct;
+
       const response = await fetch("/api/products", {
         method: editProduct ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(editProduct ? editProduct : newProduct),
+        body: JSON.stringify(dataToSend),
       });
-      
+
       if (response.ok) {
-        setSuccess(editProduct ? "Producto actualizado correctamente" : "Producto creado correctamente");
+        setSuccess(
+          editProduct
+            ? "Producto actualizado correctamente"
+            : "Producto creado correctamente"
+        );
         fetchProducts();
         setNewProduct({
           descripcion: "",
@@ -204,13 +235,15 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
           categoria_id: 0,
           subcategoria_id: 0,
           precio_costo: "",
-          precio_unidad: ""
+          precio_unidad: "",
         });
         setEditProduct(null);
       } else {
-        setError("Error al guardar el producto");
+        const data = await response.json();
+        setError(data.message || "Error al guardar el producto");
       }
     } catch (error) {
+      console.error("Error al guardar el producto:", error);
       setError("Error al guardar el producto");
     }
   };
@@ -270,24 +303,50 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
         <table className="min-w-full bg-white shadow-md rounded-lg">
           <thead className="bg-gray-100">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presentación</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subcategoría</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio Costo</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio Unidad</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Descripción
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Presentación
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Categoría
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Subcategoría
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Precio Costo
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Precio Unidad
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Acciones
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {products.map((product) => (
               <tr key={product.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">{product.descripcion}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{getPresentacionNombre(product.presentacion_id)}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{getCategoriaNombre(product.categoria_id)}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{getSubcategoriaNombre(product.subcategoria_id)}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{formatPrice(product.precio_costo)}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{formatPrice(product.precio_unidad)}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {product.descripcion}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {getPresentacionNombre(product.presentacion_id)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {getCategoriaNombre(product.categoria_id)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {getSubcategoriaNombre(product.subcategoria_id)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {formatPrice(product.precio_costo)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {formatPrice(product.precio_unidad)}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button
                     onClick={() => handleEdit(product)}
@@ -312,7 +371,7 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
         <h2 className="text-xl font-semibold mb-4">
           {editProduct ? "Editar Producto" : "Agregar Nuevo Producto"}
         </h2>
-        
+
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
@@ -325,7 +384,7 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
           </div>
         )}
 
-<div className="mb-6 space-y-4">
+        <div className="mb-6 space-y-4">
           {/* Formulario para nueva presentación */}
           <div>
             <button
@@ -333,7 +392,9 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
               onClick={() => setShowNewPresentacion(!showNewPresentacion)}
               className="text-indigo-600 hover:text-indigo-900"
             >
-              {showNewPresentacion ? "- Cancelar nueva presentación" : "+ Agregar nueva presentación"}
+              {showNewPresentacion
+                ? "- Cancelar nueva presentación"
+                : "+ Agregar nueva presentación"}
             </button>
             {showNewPresentacion && (
               <div className="mt-2 flex gap-2">
@@ -361,7 +422,9 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
               onClick={() => setShowNewCategoria(!showNewCategoria)}
               className="text-indigo-600 hover:text-indigo-900"
             >
-              {showNewCategoria ? "- Cancelar nueva categoría" : "+ Agregar nueva categoría"}
+              {showNewCategoria
+                ? "- Cancelar nueva categoría"
+                : "+ Agregar nueva categoría"}
             </button>
             {showNewCategoria && (
               <div className="mt-2 flex gap-2">
@@ -389,13 +452,17 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
               onClick={() => setShowNewSubcategoria(!showNewSubcategoria)}
               className="text-indigo-600 hover:text-indigo-900"
             >
-              {showNewSubcategoria ? "- Cancelar nueva subcategoría" : "+ Agregar nueva subcategoría"}
+              {showNewSubcategoria
+                ? "- Cancelar nueva subcategoría"
+                : "+ Agregar nueva subcategoría"}
             </button>
             {showNewSubcategoria && (
               <div className="mt-2 space-y-2">
                 <select
                   value={selectedCategoriaForSub}
-                  onChange={(e) => setSelectedCategoriaForSub(Number(e.target.value))}
+                  onChange={(e) =>
+                    setSelectedCategoriaForSub(Number(e.target.value))
+                  }
                   className="w-full rounded-md border-gray-300"
                 >
                   <option value={0}>Selecciona una categoría</option>
@@ -430,8 +497,17 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
             <input
               type="text"
               name="descripcion"
-              value={editProduct ? editProduct.descripcion : newProduct.descripcion}
-              onChange={(e) => (editProduct ? setEditProduct({ ...editProduct, descripcion: e.target.value }) : handleChange(e))}
+              value={
+                editProduct ? editProduct.descripcion : newProduct.descripcion
+              }
+              onChange={(e) =>
+                editProduct
+                  ? setEditProduct({
+                      ...editProduct,
+                      descripcion: e.target.value,
+                    })
+                  : handleChange(e)
+              }
               placeholder="Descripción"
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               required
@@ -441,12 +517,25 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <select
               name="presentacion_id"
-              value={editProduct ? editProduct.presentacion_id : newProduct.presentacion_id}
-              onChange={(e) => (editProduct ? setEditProduct({ ...editProduct, presentacion_id: Number(e.target.value) }) : handleChange(e))}
+              value={
+                editProduct
+                  ? editProduct.presentacion_id
+                  : newProduct.presentacion_id
+              }
+              onChange={(e) =>
+                editProduct
+                  ? setEditProduct({
+                      ...editProduct,
+                      presentacion_id: Number(e.target.value),
+                    })
+                  : handleChange(e)
+              }
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               required
             >
-              <option value={0} disabled>Selecciona una presentación</option>
+              <option value={0} disabled>
+                Selecciona una presentación
+              </option>
               {selectOptions.presentaciones.map((presentacion) => (
                 <option key={presentacion.id} value={presentacion.id}>
                   {presentacion.nombre}
@@ -456,12 +545,23 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
 
             <select
               name="categoria_id"
-              value={editProduct ? editProduct.categoria_id : newProduct.categoria_id}
-              onChange={(e) => (editProduct ? setEditProduct({ ...editProduct, categoria_id: Number(e.target.value) }) : handleChange(e))}
+              value={
+                editProduct ? editProduct.categoria_id : newProduct.categoria_id
+              }
+              onChange={(e) =>
+                editProduct
+                  ? setEditProduct({
+                      ...editProduct,
+                      categoria_id: Number(e.target.value),
+                    })
+                  : handleChange(e)
+              }
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               required
             >
-              <option value={0} disabled>Selecciona una categoría</option>
+              <option value={0} disabled>
+                Selecciona una categoría
+              </option>
               {selectOptions.categorias.map((categoria) => (
                 <option key={categoria.id} value={categoria.id}>
                   {categoria.nombre}
@@ -471,14 +571,33 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
 
             <select
               name="subcategoria_id"
-              value={editProduct ? editProduct.subcategoria_id : newProduct.subcategoria_id}
-              onChange={(e) => (editProduct ? setEditProduct({ ...editProduct, subcategoria_id: Number(e.target.value) }) : handleChange(e))}
+              value={
+                editProduct
+                  ? editProduct.subcategoria_id
+                  : newProduct.subcategoria_id
+              }
+              onChange={(e) =>
+                editProduct
+                  ? setEditProduct({
+                      ...editProduct,
+                      subcategoria_id: Number(e.target.value),
+                    })
+                  : handleChange(e)
+              }
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               required
             >
-              <option value={0} disabled>Selecciona una subcategoría</option>
+              <option value={0} disabled>
+                Selecciona una subcategoría
+              </option>
               {selectOptions.subcategorias
-                .filter((subcategoria) => subcategoria.categoria_id === (editProduct ? editProduct.categoria_id : newProduct.categoria_id))
+                .filter(
+                  (subcategoria) =>
+                    subcategoria.categoria_id ===
+                    (editProduct
+                      ? editProduct.categoria_id
+                      : newProduct.categoria_id)
+                )
                 .map((subcategoria) => (
                   <option key={subcategoria.id} value={subcategoria.id}>
                     {subcategoria.nombre}
@@ -497,11 +616,21 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
                 name="precio_costo"
                 step="0.01"
                 min="0"
-                value={editProduct ? editProduct.precio_costo || '' : newProduct.precio_costo}
-                onChange={(e) => (editProduct ? 
-                  setEditProduct({ ...editProduct, precio_costo: e.target.value }) : 
-                  handleChange(e)
-                )}
+                value={
+                  editProduct
+                    ? editProduct.precio_costo || ""
+                    : newProduct.precio_costo
+                }
+                onChange={(e) => {
+                  if (editProduct) {
+                    setEditProduct({
+                      ...editProduct,
+                      precio_costo: e.target.value,
+                    });
+                  } else {
+                    handleChange(e);
+                  }
+                }}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 required
               />
@@ -515,11 +644,21 @@ const [showNewSubcategoria, setShowNewSubcategoria] = useState(false);
                 name="precio_unidad"
                 step="0.01"
                 min="0"
-                value={editProduct ? editProduct.precio_unidad || '' : newProduct.precio_unidad}
-                onChange={(e) => (editProduct ? 
-                  setEditProduct({ ...editProduct, precio_unidad: e.target.value }) : 
-                  handleChange(e)
-                )}
+                value={
+                  editProduct
+                    ? editProduct.precio_unidad || ""
+                    : newProduct.precio_unidad
+                }
+                onChange={(e) => {
+                  if (editProduct) {
+                    setEditProduct({
+                      ...editProduct,
+                      precio_unidad: e.target.value,
+                    });
+                  } else {
+                    handleChange(e);
+                  }
+                }}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 required
               />
