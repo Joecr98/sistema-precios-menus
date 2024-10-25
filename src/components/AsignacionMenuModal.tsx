@@ -155,7 +155,7 @@ export default function AsignacionMenuModal({ isOpen, onClose, clienteId, client
             <div className="flex justify-end gap-4 mt-6 pt-4 border-t">
               <button
                 onClick={onClose}
-                className="px-4 py-2 border rounded hover:bg-gray-100 transition duration-300"
+                className="px-4 py-2 border rounded hover:bg-blue-700 transition duration-300"
                 disabled={saving}
               >
                 Cancelar
