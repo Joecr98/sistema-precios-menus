@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { Calendar } from 'lucide-react';
+import { Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface Cliente {
   id: number;
@@ -14,13 +14,13 @@ interface DiaSemana {
 }
 
 const DIAS_SEMANA: DiaSemana[] = [
-  { value: 'Lunes', label: 'Lunes' },
-  { value: 'Martes', label: 'Martes' },
-  { value: 'Miércoles', label: 'Miércoles' },
-  { value: 'Jueves', label: 'Jueves' },
-  { value: 'Viernes', label: 'Viernes' },
-  { value: 'Sábado', label: 'Sábado' },
-  { value: 'Domingo', label: 'Domingo' }
+  { value: "Lunes", label: "Lunes" },
+  { value: "Martes", label: "Martes" },
+  { value: "Miércoles", label: "Miércoles" },
+  { value: "Jueves", label: "Jueves" },
+  { value: "Viernes", label: "Viernes" },
+  { value: "Sábado", label: "Sábado" },
+  { value: "Domingo", label: "Domingo" },
 ];
 
 interface DetailItem {
@@ -49,16 +49,18 @@ interface BillingSummary {
 }
 
 const formatCurrency = (value: number): string => {
-  return value.toLocaleString('es-ES', {
+  return value.toLocaleString("es-ES", {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   });
 };
 
 const BillingComponent = () => {
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
-  const [billingSummary, setBillingSummary] = useState<BillingSummary | null>(null);
+  const [billingSummary, setBillingSummary] = useState<BillingSummary | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [clients, setClients] = useState<Cliente[]>([]);
@@ -66,20 +68,20 @@ const BillingComponent = () => {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response = await fetch('/api/clientes');
+        const response = await fetch("/api/clientes");
         const data = await response.json();
         setClients(data);
       } catch (error) {
-        console.error('Error fetching clients:', error);
+        console.error("Error fetching clients:", error);
       }
     };
     fetchClients();
   }, []);
 
   const handleDayToggle = (day: string) => {
-    setSelectedDays(prev => {
+    setSelectedDays((prev) => {
       if (prev.includes(day)) {
-        return prev.filter(d => d !== day);
+        return prev.filter((d) => d !== day);
       } else {
         return [...prev, day];
       }
@@ -91,29 +93,31 @@ const BillingComponent = () => {
 
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await fetch('/api/facturas', {
-        method: 'POST',
+      const response = await fetch("/api/facturas", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           clientId: selectedClient,
           dias: selectedDays,
         }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al generar la factura');
+        throw new Error(errorData.message || "Error al generar la factura");
       }
-      
+
       const data = await response.json();
       setBillingSummary(data);
     } catch (error) {
-      console.error('Error:', error);
-      setError(error instanceof Error ? error.message : 'Error al generar la factura');
+      console.error("Error:", error);
+      setError(
+        error instanceof Error ? error.message : "Error al generar la factura"
+      );
     } finally {
       setLoading(false);
     }
@@ -128,8 +132,12 @@ const BillingComponent = () => {
       )}
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Facturación por Días</h1>
-        <p className="text-gray-600">Genere facturas seleccionando los días específicos de los menús</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          Facturación por Días
+        </h1>
+        <p className="text-gray-600">
+          Genere facturas seleccionando los días específicos de los menús
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -139,7 +147,7 @@ const BillingComponent = () => {
             <h2 className="text-lg font-semibold">Seleccionar Cliente</h2>
           </div>
           <div>
-            <select 
+            <select
               className="w-full p-2 border rounded-md"
               onChange={(e) => setSelectedClient(e.target.value)}
             >
@@ -163,12 +171,13 @@ const BillingComponent = () => {
           </div>
           <div className="grid grid-cols-2 gap-2">
             {DIAS_SEMANA.map((dia) => (
-              <label 
+              <label
                 key={dia.value}
                 className={`flex items-center p-3 rounded-md border cursor-pointer transition-colors
-                  ${selectedDays.includes(dia.value)
-                    ? 'bg-blue-50 border-blue-500 text-blue-700'
-                    : 'hover:bg-gray-50'
+                  ${
+                    selectedDays.includes(dia.value)
+                      ? "bg-blue-50 border-blue-500 text-blue-700"
+                      : "hover:bg-gray-50"
                   }`}
               >
                 <input
@@ -190,7 +199,7 @@ const BillingComponent = () => {
             disabled={!selectedClient || selectedDays.length === 0 || loading}
             onClick={generateBill}
           >
-            {loading ? 'Generando...' : 'Generar Factura'}
+            {loading ? "Generando..." : "Generar Factura"}
           </button>
         </div>
       </div>
@@ -202,7 +211,10 @@ const BillingComponent = () => {
             <h2 className="text-2xl font-bold mb-2">Resumen de Facturación</h2>
             <div className="text-gray-600">
               <p>Cliente: {billingSummary.cliente.nombre}</p>
-              <p>Fecha: {new Date(billingSummary.fechaGeneracion).toLocaleDateString()}</p>
+              <p>
+                Fecha:{" "}
+                {new Date(billingSummary.fechaGeneracion).toLocaleDateString()}
+              </p>
               <p>Factura #: {billingSummary.facturaId}</p>
             </div>
           </div>
@@ -211,12 +223,24 @@ const BillingComponent = () => {
             {billingSummary.details.map((detail, index) => (
               <div key={index} className="border rounded-lg p-4">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold">{detail.day} - {detail.menuName}</h3>
-                  <span className="text-blue-600 font-semibold">
-                    Total del menú: ${formatCurrency(Number(detail.subtotal))}
-                  </span>
+                  <h3 className="text-lg font-semibold">
+                    {detail.day} - {detail.menuName}
+                  </h3>
+                  <div className="text-right">
+                    <div className="text-gray-600">
+                      Base: Q{formatCurrency(Number(detail.subtotal))}
+                    </div>
+                    {detail.subtotalExtras > 0 && (
+                      <div className="text-orange-600">
+                        Extras: Q{formatCurrency(Number(detail.subtotalExtras))}
+                      </div>
+                    )}
+                    <div className="text-blue-600 font-semibold">
+                      Total: Q{formatCurrency(Number(detail.total))}
+                    </div>
+                  </div>
                 </div>
-                
+
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
@@ -227,18 +251,56 @@ const BillingComponent = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {detail.detalles.map((item, itemIndex) => (
-                      <tr key={itemIndex} className="border-t">
-                        <td className="px-4 py-2">{item.producto}</td>
-                        <td className="px-4 py-2 text-right">{item.cantidad}</td>
-                        <td className="px-4 py-2 text-right">
-                          ${formatCurrency(Number(item.precioUnitario))}
-                        </td>
-                        <td className="px-4 py-2 text-right">
-                          ${formatCurrency(Number(item.subtotal))}
-                        </td>
-                      </tr>
-                    ))}
+                    {/* Productos Base */}
+                    {detail.detalles
+                      .filter((item) => !item.esExtra)
+                      .map((item, itemIndex) => (
+                        <tr key={`base-${itemIndex}`} className="border-t">
+                          <td className="px-4 py-2">{item.producto}</td>
+                          <td className="px-4 py-2 text-right">
+                            {item.cantidad}
+                          </td>
+                          <td className="px-4 py-2 text-right">
+                            Q{formatCurrency(Number(item.precioUnitario))}
+                          </td>
+                          <td className="px-4 py-2 text-right">
+                            Q{formatCurrency(Number(item.subtotal))}
+                          </td>
+                        </tr>
+                      ))}
+
+                    {/* Productos Extra */}
+                    {detail.detalles.some((item) => item.esExtra) && (
+                      <>
+                        <tr>
+                          <td
+                            colSpan={4}
+                            className="px-4 py-2 bg-orange-50 text-orange-700 font-semibold"
+                          >
+                            Productos Extra
+                          </td>
+                        </tr>
+                        {detail.detalles
+                          .filter((item) => item.esExtra)
+                          .map((item, itemIndex) => (
+                            <tr
+                              key={`extra-${itemIndex}`}
+                              className="border-t bg-orange-50"
+                            >
+                              <td className="px-4 py-2">{item.producto}</td>
+                              <td className="px-4 py-2 text-right">
+                                {item.cantidad}
+                              </td>
+                              <td className="px-4 py-2 text-right">
+                                Q{formatCurrency(Number(item.precioUnitario))}
+                              </td>
+                              <td className="px-4 py-2 text-right">
+                                Q{formatCurrency(Number(item.subtotal))}
+                              </td>
+                            </tr>
+                          ))}
+                      </>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -246,7 +308,7 @@ const BillingComponent = () => {
 
             <div className="mt-6 border-t pt-4">
               <div className="text-right text-2xl font-bold">
-                Total Final: ${formatCurrency(Number(billingSummary.total))}
+                Total Final: Q{formatCurrency(Number(billingSummary.total))}
               </div>
             </div>
           </div>
