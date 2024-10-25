@@ -1,7 +1,12 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import mysql from 'mysql2/promise';
+import { NextApiRequest, NextApiResponse } from "next";
+import mysql from "mysql2/promise";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", ["GET"]);
+    return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
+  }
+
   try {
     const connection = await mysql.createConnection({
       host: process.env.DATABASE_HOST,
@@ -10,22 +15,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       database: process.env.DATABASE_NAME,
     });
 
-    // Consultas a las tablas de la base de datos
-    const [presentaciones]: any = await connection.query('SELECT id, nombre FROM presentaciones');
-    const [categorias]: any = await connection.query('SELECT id, nombre FROM categorias');
-    const [subcategorias]: any = await connection.query('SELECT id, nombre, categoria_id FROM subcategorias');
+    try {
+      // Obtener presentaciones
+      const [presentaciones] = await connection.query(
+        "SELECT id, nombre FROM Presentaciones ORDER BY nombre"
+      );
 
-    // Formatear los datos para que sean consistentes con lo que espera el frontend
-    res.status(200).json({
-      presentaciones: presentaciones.map((p: any) => ({ id: p.id, nombre: p.nombre })),
-      categorias: categorias.map((c: any) => ({ id: c.id, nombre: c.nombre })),
-      subcategorias: subcategorias.map((s: any) => ({ id: s.id, nombre: s.nombre, categoria_id: s.categoria_id })),
-    });
+      // Obtener categorías
+      const [categorias] = await connection.query(
+        "SELECT id, nombre FROM Categorias ORDER BY nombre"
+      );
 
-    await connection.end();
+      // Obtener subcategorías
+      const [subcategorias] = await connection.query(`
+        SELECT id, nombre, categoria_id 
+        FROM Subcategorias 
+        ORDER BY nombre
+      `);
+
+      await connection.end();
+
+      res.status(200).json({
+        presentaciones,
+        categorias,
+        subcategorias,
+      });
+    } catch (error) {
+      console.error("Error al obtener opciones:", error);
+      await connection.end();
+      res.status(500).json({ message: "Error al obtener las opciones" });
+    }
   } catch (error) {
-    console.error('Error al obtener los datos:', error);
-    res.status(500).json({ message: 'Error al obtener las opciones de selección' });
+    console.error("Error de conexión:", error);
+    res.status(500).json({ message: "Error de conexión con la base de datos" });
   }
 }
-
