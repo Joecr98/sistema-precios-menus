@@ -10,8 +10,9 @@ export default function MenusPage() {
   const router = useRouter();
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto p-4 min-w-[1200px] min-h-[500px]">
+      {/* Header con título y botón */}
+      <div className="flex justify-between items-center mb-6 px-4">
         <h1 className="text-2xl font-bold">Gestión de Menús</h1>
         <button
           onClick={() => setMostrarCreacion(!mostrarCreacion)}
@@ -21,11 +22,14 @@ export default function MenusPage() {
         </button>
       </div>
 
-      {mostrarCreacion ? (
-        <CreacionMenu />
-      ) : (
-        <ListaMenus />
-      )}
+      {/* Contenido principal */}
+      <div className="flex justify-center">
+        {mostrarCreacion ? (
+          <CreacionMenu />
+        ) : (
+          <ListaMenus />
+        )}
+      </div>
     </div>
   );
 }

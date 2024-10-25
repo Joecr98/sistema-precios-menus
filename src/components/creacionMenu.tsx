@@ -202,7 +202,7 @@ const CreacionMenu = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="bg-white rounded-lg shadow-lg p-8 w-[800px] min-h-[300px] mx-auto">
       <h2 className="text-xl font-semibold mb-6">Crear Nuevo Menú</h2>
 
       {error && (

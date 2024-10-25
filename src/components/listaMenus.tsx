@@ -88,11 +88,11 @@ const ListaMenus = () => {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {menus.map((menu) => (
           <div
             key={menu.id}
-            className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
+            className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow min-w-[200px] h-[150px]"
             onClick={() => setMenuSeleccionado(menu)}
           >
             <h3
@@ -115,7 +115,7 @@ const ListaMenus = () => {
       </div>
 
       {menuSeleccionado && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-blue-500 bg-opacity-50 flex items-center justify-center p-4 w-[100%] h-[100%]">
           <div className="bg-white rounded-lg w-full max-w-2xl relative">
             <div className="absolute top-4 right-4 flex gap-2">
               {" "}
