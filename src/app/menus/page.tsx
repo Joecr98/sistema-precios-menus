@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CreacionMenu from '../../components/creacionMenu';
+import ListaMenus from '../../components/listaMenus';
 import { useRouter } from 'next/navigation';
 
 export default function MenusPage() {
@@ -23,13 +24,7 @@ export default function MenusPage() {
       {mostrarCreacion ? (
         <CreacionMenu />
       ) : (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Menús Existentes</h2>
-          {/* para agregar una tabla o lista de menús existentes */}
-          <div className="text-gray-500">
-            No hay menús creados aún. Haga clic en "Crear Nuevo Menú" para comenzar.
-          </div>
-        </div>
+        <ListaMenus />
       )}
     </div>
   );

@@ -6,7 +6,11 @@ import { Plus, Trash2, Save } from 'lucide-react';
 interface Producto {
   id: number;
   descripcion: string;
+  presentacion: string;
+  categoria: string;
+  subcategoria: string;
   precio_unidad: number;
+  precio_costo: number;
 }
 
 interface DetalleMenu {
@@ -38,20 +42,41 @@ const CreacionMenu = () => {
 
   useEffect(() => {
     calcularCostoTotal();
-  }, [menu.detalles]);
+  }, [menu.detalles, productos]);
 
   const fetchProductos = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/productos');
+      setError('');
+      const response = await fetch('/api/products');
+      
       if (!response.ok) {
-        throw new Error('Error al obtener productos');
+        throw new Error(`Error al obtener productos: ${response.statusText}`);
       }
+      
       const data = await response.json();
-      setProductos(data);
+      console.log('Productos recibidos:', data); // Para debugging
+
+      if (!Array.isArray(data)) {
+        throw new Error('Los datos recibidos no tienen el formato esperado');
+      }
+
+      // Transformar y validar los datos recibidos
+      const productosValidados = data.map(item => ({
+        id: item.id,
+        descripcion: item.descripcion || 'Sin descripción',
+        presentacion: item.presentacion || 'Sin presentación',
+        categoria: item.categoria || 'Sin categoría',
+        subcategoria: item.subcategoria || 'Sin subcategoría',
+        precio_unidad: Number(item.precio_unidad) || 0,
+        precio_costo: Number(item.precio_costo) || 0
+      }));
+
+      setProductos(productosValidados);
     } catch (err) {
-      setError('Error al cargar los productos');
-      console.error('Error fetching productos:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar los productos';
+      setError(errorMessage);
+      console.error('Error en fetchProductos:', err);
     } finally {
       setLoading(false);
     }
@@ -59,7 +84,7 @@ const CreacionMenu = () => {
 
   const calcularCostoTotal = () => {
     const total = menu.detalles.reduce((sum, detalle) => {
-      const producto = productos.find(p => p.id === parseInt(detalle.producto_id as string));
+      const producto = productos.find(p => p.id === Number(detalle.producto_id));
       return sum + (producto?.precio_unidad || 0) * detalle.cantidad;
     }, 0);
     setCostoTotal(total);
@@ -84,16 +109,11 @@ const CreacionMenu = () => {
   };
 
   const actualizarDetalle = (index: number, campo: keyof DetalleMenu, valor: any) => {
-    if (campo === 'cantidad') {
-      // Convertir a entero y asegurarse de que no sea negativo
-      valor = Math.max(1, parseInt(valor) || 1);
-    }
-    
     setMenu(prev => {
       const nuevosDetalles = [...prev.detalles];
       nuevosDetalles[index] = {
         ...nuevosDetalles[index],
-        [campo]: valor
+        [campo]: campo === 'cantidad' ? Math.max(1, parseInt(valor) || 1) : valor
       };
       return {
         ...prev,
@@ -109,43 +129,32 @@ const CreacionMenu = () => {
     });
     setCostoTotal(0);
     setError('');
-  };
-
-  const validarFormulario = (): boolean => {
-    if (!menu.nombre.trim()) {
-      setError('El nombre del menú es requerido');
-      return false;
-    }
-
-    if (menu.detalles.length === 0) {
-      setError('Debe agregar al menos un producto al menú');
-      return false;
-    }
-
-    for (const detalle of menu.detalles) {
-      if (!detalle.producto_id) {
-        setError('Todos los productos deben ser seleccionados');
-        return false;
-      }
-      if (detalle.cantidad < 1 || !Number.isInteger(detalle.cantidad)) {
-        setError('La cantidad debe ser un número entero mayor a 0');
-        return false;
-      }
-    }
-
-    return true;
+    setSuccess('');
   };
 
   const guardarMenu = async () => {
-    setError('');
-    setSuccess('');
-
-    if (!validarFormulario()) {
-      return;
-    }
-
     try {
       setLoading(true);
+      setError('');
+      setSuccess('');
+
+      if (!menu.nombre.trim()) {
+        throw new Error('El nombre del menú es requerido');
+      }
+
+      if (menu.detalles.length === 0) {
+        throw new Error('Debe agregar al menos un producto al menú');
+      }
+
+      // Validar que todos los productos tengan valores válidos
+      const detallesInvalidos = menu.detalles.some(
+        detalle => !detalle.producto_id || detalle.cantidad < 1
+      );
+
+      if (detallesInvalidos) {
+        throw new Error('Todos los productos deben tener una selección válida y cantidad mayor a 0');
+      }
+
       const response = await fetch('/api/menus', {
         method: 'POST',
         headers: {
@@ -153,19 +162,16 @@ const CreacionMenu = () => {
         },
         body: JSON.stringify(menu)
       });
-      
+
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Error al guardar el menú');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al guardar el menú');
       }
-      
-      setSuccess('Menú creado exitosamente');
+
+      setSuccess('Menú guardado exitosamente');
       limpiarFormulario();
-      
-      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar el menú');
-      console.error('Error saving menu:', err);
     } finally {
       setLoading(false);
     }
@@ -233,7 +239,7 @@ const CreacionMenu = () => {
                     <option value="">Seleccione un producto</option>
                     {productos.map(producto => (
                       <option key={producto.id} value={producto.id}>
-                        {producto.descripcion}
+                        {`${producto.descripcion} - ${producto.presentacion} - $${producto.precio_unidad.toFixed(2)}`}
                       </option>
                     ))}
                   </select>
@@ -246,7 +252,7 @@ const CreacionMenu = () => {
                     onChange={(e) => actualizarDetalle(index, 'cantidad', e.target.value)}
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     min="1"
-                    step="1" // Asegura que solo se puedan ingresar números enteros
+                    step="1"
                   />
                 </div>
 
@@ -287,7 +293,7 @@ const CreacionMenu = () => {
             <button
               onClick={guardarMenu}
               disabled={loading}
-              className="flex items-center gap-2 px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
               {loading ? 'Guardando...' : 'Guardar Menú'}
