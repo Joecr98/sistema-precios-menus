@@ -15,9 +15,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const [rows] = await connection.query(`
         SELECT 
           p.*,
+          pres.nombre as presentacion,
+          cat.nombre as categoria,
+          subcat.nombre as subcategoria,
           COALESCE(pr.precio_unidad, 0) as precio_unidad,
           COALESCE(pr.precio_costo, 0) as precio_costo
         FROM Productos p
+        LEFT JOIN Presentaciones pres ON p.presentacion_id = pres.id
+        LEFT JOIN Categorias cat ON p.categoria_id = cat.id
+        LEFT JOIN Subcategorias subcat ON p.subcategoria_id = subcat.id
         LEFT JOIN (
           SELECT 
             producto_id,
@@ -33,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       `);
       await connection.end();
       return res.status(200).json(rows);
-    } 
+    }
     
     else if (req.method === "POST") {
       const { descripcion, presentacion_id, categoria_id, subcategoria_id, precio_costo, precio_unidad } = req.body;
