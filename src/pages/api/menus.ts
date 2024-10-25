@@ -24,28 +24,31 @@ export default async function handler(
               }
             }
           }
-        },
-        orderBy: {
-          fecha_creacion: 'desc'
         }
       });
-
+  
+      console.log('Menus obtenidos:', menus); // Para debugging
+  
       const menusConPrecios = menus.map(menu => ({
         ...menu,
         detallesMenu: menu.detallesMenu.map(detalle => ({
           ...detalle,
           producto: {
             ...detalle.producto,
-            precio_unidad: detalle.producto.precios[0]?.precio_unidad || 0,
-            precio_costo: detalle.producto.precios[0]?.precio_costo || 0
+            precio_unidad: detalle.producto.precios[0]?.precio_unidad ?? 0,
+            precio_costo: detalle.producto.precios[0]?.precio_costo ?? 0
           }
         }))
       }));
-
+  
       return res.status(200).json(menusConPrecios);
     } catch (error) {
-      console.error('Error al obtener menús:', error);
-      return res.status(500).json({ error: 'Error al obtener los menús' });
+      // Mejoramos el manejo de errores
+      console.error('Error detallado al obtener menús:', error);
+      return res.status(500).json({ 
+        error: 'Error al obtener los menús',
+        details: error instanceof Error ? error.message : 'Error desconocido'
+      });
     }
   }
 
