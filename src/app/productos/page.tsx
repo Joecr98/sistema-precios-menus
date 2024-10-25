@@ -253,11 +253,13 @@ export default function ProductsPage() {
       const response = await fetch(`/api/products?id=${id}`, {
         method: "DELETE",
       });
+      const data = await response.json();
+      
       if (response.ok) {
-        setSuccess("Producto eliminado correctamente");
+        setSuccess(data.message);
         fetchProducts();
       } else {
-        setError("Error al borrar el producto");
+        setError(data.message || "Error al borrar el producto");
       }
     } catch (error) {
       setError("Error al borrar el producto");

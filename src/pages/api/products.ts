@@ -117,22 +117,61 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         await connection.beginTransaction();
         
-        // Eliminar precios relacionados
-        await connection.query('DELETE FROM Precios WHERE producto_id = ?', [id]);
+        // Primero verificar si el producto está siendo usado
+        const [detallesMenu] = await connection.query(
+          'SELECT COUNT(*) as count FROM DetallesMenu WHERE producto_id = ?',
+          [id]
+        );
         
-        // Eliminar el producto
-        await connection.query('DELETE FROM Productos WHERE id = ?', [id]);
+        if (detallesMenu[0].count > 0) {
+          await connection.rollback();
+          await connection.end();
+          return res.status(400).json({ 
+            message: 'No se puede eliminar el producto porque está siendo usado en uno o más menús'
+          });
+        }
+
+        const [detallesFactura] = await connection.query(
+          'SELECT COUNT(*) as count FROM DetallesFactura WHERE producto_id = ?',
+          [id]
+        );
+
+        if (detallesFactura[0].count > 0) {
+          await connection.rollback();
+          await connection.end();
+          return res.status(400).json({ 
+            message: 'No se puede eliminar el producto porque está siendo usado en una o más facturas'
+          });
+        }
+        
+        // Si no está siendo usado, procedemos a eliminar
+        // Primero eliminamos los precios relacionados
+        await connection.query(
+          'DELETE FROM Precios WHERE producto_id = ?', 
+          [id]
+        );
+        
+        // Luego eliminamos el producto
+        await connection.query(
+          'DELETE FROM Productos WHERE id = ?', 
+          [id]
+        );
         
         await connection.commit();
         await connection.end();
-        return res.status(200).json({ message: 'Producto eliminado correctamente' });
+        return res.status(200).json({ 
+          message: 'Producto eliminado correctamente'
+        });
       } catch (error) {
         await connection.rollback();
         await connection.end();
         console.error('Error al eliminar producto:', error);
-        return res.status(500).json({ message: 'Error al eliminar el producto' });
+        return res.status(500).json({ 
+          message: 'Error al eliminar el producto'
+        });
       }
     }
+
     
     else {
       await connection.end();
@@ -145,6 +184,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await connection.end();
     }
     console.error('Error de conexión:', error);
-    return res.status(500).json({ message: "Error de conexión con la base de datos" });
+    return res.status(500).json({ 
+      message: "Error de conexión con la base de datos" 
+    });
   }
 }
