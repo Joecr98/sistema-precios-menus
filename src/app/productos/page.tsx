@@ -30,7 +30,7 @@ interface NewProduct {
 const formatPrice = (price: number | string | null | undefined): string => {
   if (!price) return "No disponible";
   const numPrice = typeof price === "string" ? parseFloat(price) : price;
-  return `$${numPrice.toFixed(2)}`;
+  return `Q${numPrice.toFixed(2)}`;
 };
 
 export default function ProductsPage() {

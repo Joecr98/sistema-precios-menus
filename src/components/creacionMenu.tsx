@@ -264,7 +264,7 @@ const CreacionMenu = () => {
                       <option key={producto.id} value={producto.id}>
                         {`${producto.descripcion} - ${
                           producto.presentacion
-                        } - $${producto.precio_unidad.toFixed(2)}`}
+                        } - Q${producto.precio_unidad.toFixed(2)}`}
                       </option>
                     ))}
                   </select>

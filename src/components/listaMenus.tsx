@@ -49,7 +49,7 @@ const ListaMenus = () => {
 
   const calcularCostoTotal = (detalles: DetalleMenu[]) => {
     return detalles.reduce((sum, detalle) => {
-      // Asegurarse de que precio_unidad y cantidad sean números
+      //  precio_unidad y cantidad deben ser números
       const precioUnidad = Number(detalle.producto?.precio_unidad) || 0;
       const cantidad = Number(detalle.cantidad) || 0;
       return sum + precioUnidad * cantidad;
@@ -108,7 +108,7 @@ const ListaMenus = () => {
                     {menu.detallesMenu.length} productos
                   </p>
                   <p className="font-medium text-gray-800">
-                    Costo Total: ${costoTotal.toFixed(2)}
+                    Costo Total: Q{costoTotal.toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -176,7 +176,7 @@ const ListaMenus = () => {
                         </p>
                       </div>
                       <p className="font-medium text-gray-700">
-                        $
+                        Q
                         {(
                           detalle.producto.precio_unidad * detalle.cantidad
                         ).toFixed(2)}
@@ -188,7 +188,7 @@ const ListaMenus = () => {
                   <div className="flex justify-between items-center">
                     <p className="font-semibold text-gray-800">Total</p>
                     <p className="font-semibold text-gray-800">
-                      $
+                      Q
                       {calcularCostoTotal(
                         menuSeleccionado.detallesMenu
                       ).toFixed(2)}
