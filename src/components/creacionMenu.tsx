@@ -14,17 +14,32 @@ interface Producto {
 }
 
 interface DetalleMenu {
+  id?: number;
   producto_id: string | number;
   cantidad: number;
   es_extra: boolean;
+  producto?: {
+    descripcion: string;
+    precio_unidad: number;
+  };
 }
 
 interface Menu {
+  id?: number;
   nombre: string;
   detalles: DetalleMenu[];
 }
 
-const CreacionMenu = () => {
+interface CreacionMenuProps {
+  menuParaEditar?: {
+    id: number;
+    nombre: string;
+    detallesMenu: DetalleMenu[];
+  } | null;
+  onClose: () => void;
+}
+
+const CreacionMenu = ({ menuParaEditar, onClose }: CreacionMenuProps) => {
   const [menu, setMenu] = useState<Menu>({
     nombre: "",
     detalles: [],
@@ -37,12 +52,25 @@ const CreacionMenu = () => {
   const [costoTotal, setCostoTotal] = useState(0);
 
   useEffect(() => {
-    fetchProductos();
-  }, []);
-
-  useEffect(() => {
     calcularCostoTotal();
   }, [menu.detalles, productos]);
+
+  useEffect(() => {
+    fetchProductos();
+    if (menuParaEditar) {
+      // Convertir el formato del menú para editar
+      setMenu({
+        id: menuParaEditar.id,
+        nombre: menuParaEditar.nombre,
+        detalles: menuParaEditar.detallesMenu.map(detalle => ({
+          id: detalle.id,
+          producto_id: detalle.producto_id,
+          cantidad: detalle.cantidad,
+          es_extra: detalle.es_extra
+        }))
+      });
+    }
+  }, [menuParaEditar]);
 
   const fetchProductos = async () => {
     try {
@@ -167,8 +195,11 @@ const CreacionMenu = () => {
         );
       }
 
-      const response = await fetch("/api/menus", {
-        method: "POST",
+      const url = menu.id ? `/api/menus/${menu.id}` : '/api/menus';
+      const method = menu.id ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -180,10 +211,10 @@ const CreacionMenu = () => {
         throw new Error(errorData.error || "Error al guardar el menú");
       }
 
-      setSuccess("Menú guardado exitosamente");
-      // Mostrar alerta
-      alert("¡Menú guardado exitosamente!");
+      setSuccess(menu.id ? "Menú actualizado exitosamente" : "Menú guardado exitosamente");
+      alert(menu.id ? "¡Menú actualizado exitosamente!" : "¡Menú guardado exitosamente!");
 
+      onClose(); // Cerrar el formulario después de guardar
       limpiarFormulario();
 
     } catch (err) {

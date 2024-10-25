@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Trash2 } from "lucide-react";
+import { X, Trash2, Edit } from "lucide-react";
 
 interface DetalleMenu {
   id: number;
@@ -20,7 +20,11 @@ interface Menu {
   detallesMenu: DetalleMenu[];
 }
 
-const ListaMenus = () => {
+interface ListaMenusProps {
+    onEditMenu: (menu: Menu) => void;
+  }
+
+  const ListaMenus = ({ onEditMenu }: ListaMenusProps) => {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [menuSeleccionado, setMenuSeleccionado] = useState<Menu | null>(null);
   const [loading, setLoading] = useState(true);
@@ -120,13 +124,32 @@ const ListaMenus = () => {
             <div className="absolute top-4 right-4 flex gap-2">
               {" "}
               {/* Contenedor para ambos botones */}
+               {/* Botón de Editar (corregido) */}
+               <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditMenu(menuSeleccionado);
+                  setMenuSeleccionado(null);
+                }}
+                className="p-2 bg-white text-orange-500 hover:bg-orange-100 rounded-full shadow-md hover:shadow-lg transition-all"
+                title="Editar menú"
+              >
+                <Edit className="w-6 h-6" />
+              </button>
+
+              {/* Botón de Eliminar */}
               <button
-                onClick={() => eliminarMenu(menuSeleccionado.id)}
-                className="p-2 bg-white text-red-500 hover:text-red-700 rounded-full shadow-md hover:shadow-lg transition-all"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  eliminarMenu(menuSeleccionado.id);
+                }}
+                className="p-2 bg-white text-red-500 hover:bg-red-100 rounded-full shadow-md hover:shadow-lg transition-all"
                 title="Eliminar menú"
               >
                 <Trash2 className="w-6 h-6" />
               </button>
+
+              {/* Botón de Cerrar */}
               <button
                 onClick={() => setMenuSeleccionado(null)}
                 className="p-2 bg-blue-500 text-white hover:bg-blue-600 rounded-full transition-colors"
