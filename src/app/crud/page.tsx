@@ -199,6 +199,11 @@ export default function Clientes() {
           </ul>
         </div>
       </div>
+
+      {/* Botón para regresar al menú */}
+      <button className="btn btn-secondary mt-4" onClick={() => window.history.back()}>
+        Regresar al Menú
+      </button>
     </main>
   );
 }
