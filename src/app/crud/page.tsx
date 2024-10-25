@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Swal from 'sweetalert2'; // Importar SweetAlert2 (si no lo tiene lo instalan--> npm install sweetalert2)
+import Swal from 'sweetalert2';
+import AsignacionMenuModal from '../../components/AsignacionMenuModal';
 
 // Definir el tipo Cliente
 type Cliente = {
@@ -12,15 +13,21 @@ type Cliente = {
 };
 
 export default function Clientes() {
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [nuevoCliente, setNuevoCliente] = useState({ id: 0, nombre: '', direccion: '', telefono: '' });
   const [mensaje, setMensaje] = useState('');
   const [editando, setEditando] = useState<Cliente | null>(null);
 
-  // Obtener la lista de clientes al cargar el componente
   useEffect(() => {
     obtenerClientes();
   }, []);
+
+  const abrirModalAsignacion = (cliente: Cliente) => {
+    setClienteSeleccionado(cliente);
+    setModalAbierto(true);
+  };
 
   const obtenerClientes = async () => {
     try {
@@ -32,7 +39,6 @@ export default function Clientes() {
     }
   };
 
-  // Crear un nuevo cliente
   const crearCliente = async () => {
     try {
       const res = await fetch('/api/clientes', {
@@ -53,7 +59,6 @@ export default function Clientes() {
     }
   };
 
-  // Actualizar cliente
   const actualizarCliente = async () => {
     if (!editando) return;
 
@@ -76,7 +81,6 @@ export default function Clientes() {
     }
   };
 
-  // Manejar el envío del formulario
   const manejarEnvio = () => {
     if (editando) {
       actualizarCliente();
@@ -85,7 +89,6 @@ export default function Clientes() {
     }
   };
 
-  // Eliminar cliente con confirmación
   const eliminarCliente = async (id: number) => {
     const result = await Swal.fire({
       title: '¿Estás seguro?',
@@ -124,7 +127,6 @@ export default function Clientes() {
       <h1 className="text-2xl font-bold mb-4 text-center">Gestión de Clientes</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Formulario para añadir o editar cliente */}
         <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50 px-6 py-10">
           <h2 className="text-xl font-semibold mb-4">Añadir / Editar Cliente</h2>
 
@@ -168,7 +170,6 @@ export default function Clientes() {
           {mensaje && <p className="text-green-500 mt-2">{mensaje}</p>}
         </div>
 
-        {/* Lista de clientes */}
         <div className="flex flex-col justify-start rounded-lg bg-gray-50 p-6">
           <h2 className="text-xl font-semibold mb-4">Lista de Clientes</h2>
           <ul className="space-y-2">
@@ -180,16 +181,22 @@ export default function Clientes() {
                 <span>
                   {cliente.nombre} - {cliente.direccion} - {cliente.telefono}
                 </span>
-                <div>
+                <div className="flex gap-2">
                   <button
-                    className="bg-yellow-500 text-white px-2 py-1 rounded mr-2 hover:bg-yellow-600 transition duration-300"
+                    className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition duration-300"
+                    onClick={() => abrirModalAsignacion(cliente)}
+                  >
+                    Asignar Menús
+                  </button>
+                  <button
+                    className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 transition duration-300"
                     onClick={() => setEditando(cliente)}
                   >
                     Editar
                   </button>
                   <button
                     className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition duration-300"
-                    onClick={() => eliminarCliente(cliente.id)} // Llamada a eliminar con confirmación
+                    onClick={() => eliminarCliente(cliente.id)}
                   >
                     Eliminar
                   </button>
@@ -199,6 +206,18 @@ export default function Clientes() {
           </ul>
         </div>
       </div>
+
+      {clienteSeleccionado && (
+        <AsignacionMenuModal
+          isOpen={modalAbierto}
+          onClose={() => {
+            setModalAbierto(false);
+            setClienteSeleccionado(null);
+          }}
+          clienteId={clienteSeleccionado.id}
+          clienteNombre={clienteSeleccionado.nombre}
+        />
+      )}
     </main>
   );
 }
