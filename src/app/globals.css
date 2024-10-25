@@ -5,10 +5,12 @@
 
 /* Estilos globales para todo el proyecto */
 * {
+  min-height: fit-content;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
+
 
 body {
   font-family: Arial, sans-serif;
