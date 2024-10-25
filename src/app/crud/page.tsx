@@ -218,6 +218,9 @@ export default function Clientes() {
           clienteNombre={clienteSeleccionado.nombre}
         />
       )}
+      <button className="btn btn-secondary mt-4" onClick={() => window.history.back()}>
+        Regresar al Menú
+      </button>
     </main>
   );
 }
