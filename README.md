@@ -13,6 +13,15 @@ pnpm dev
 # or
 bun dev
 ```
+## Install dependencies
+
+    npm install jsonwebtoken bcryptjs
+    npm install -g pnpm
+    pnpm i
+    pnpm install mysql2
+    npm install jspdf
+    npm install lucide-react
+
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
